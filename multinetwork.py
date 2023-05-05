@@ -21,8 +21,6 @@ class MultiMLPNetwork(nn.Module):
             for _ in range(self.repeat)
         ])
 
-            
-
     def forward(self, x):
         return torch.cat([
             net(x)
@@ -32,4 +30,24 @@ class MultiMLPNetwork(nn.Module):
     def split_eval(self, x):
         return [ net(x)
                  for net in self.body
+        ]
+
+
+
+class MultiModel(nn.Module):
+    def __init__(self, model_class, model_params, size):
+        super().__init__()
+
+        self.size = size
+
+        self.body = nn.ModuleList([
+            model_class(**model_params)
+            for _ in range(self.size)
+        ])
+        
+
+    def forward(self, x_list):
+        return [
+            net(x_list[i])
+            for i, net in enumerate(self.body)
         ]

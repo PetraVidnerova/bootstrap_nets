@@ -32,6 +32,7 @@ def main(batch_size, learning_rate, data_file):
     fit_models(net, train_data, val_data,
                learning_rate=learning_rate,
                batch_size=batch_size)
+    exit()
     _, winner = eval_models(net, val_data)
     
     winner = net.body[winner]

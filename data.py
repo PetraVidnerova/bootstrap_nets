@@ -28,25 +28,25 @@ def load_data(data_file, batch_size=32):
     return train_data, val_data, test_data, input_size
 
 
-class MultiTensorDataSet(Dataset):
+# class MultiTensorDataSet(Dataset):
     
-    def __init__(self, x_list, y_list):
-        super().__init__()
-        self.x_list = x_list
-        self.y_list = y_list
+#     def __init__(self, x_list, y_list):
+#         super().__init__()
+#         self.x_list = x_list
+#         self.y_list = y_list
 
-    def __len__(self):
-        return len(self.x_list[0])
+#     def __len__(self):
+#         return len(self.x_list[0])
 
-    def __getitem__(self, index):
-        return (
-            [x[index] for x in self.x_list],
-            torch.cat([y[index] for y in self.y_list])
-        )
+#     def __getitem__(self, index):
+#         return (
+#             [x[index] for x in self.x_list],
+#             torch.cat([y[index] for y in self.y_list])
+#         )
                 
 
 class BootstrapDataSetGenerator():
-    def __init__(self, data_file, batch_size):
+    def __init__(self, data_file, batch_size, repeat):
         self.batch_size = batch_size
         df = pd.read_csv(data_file).sample(frac=1)
 
@@ -55,11 +55,12 @@ class BootstrapDataSetGenerator():
         self.df_test = df[train_size:]
 
         self.input_size = len(df.columns)-1
+        self.repeat = repeat
         
-    def get_X_Y(self, df):
+    def get_X_Y(self, df, repeat=1):
         Y = df.pop("Y").to_numpy().reshape(-1,1)
         X = df.to_numpy()
-        return (torch.Tensor(X), torch.Tensor(Y))
+        return (torch.Tensor(X), torch.Tensor(Y).repeat(1, repeat))
         
     def get_data(self, samples=10):
         train_x_list, train_y_list = [], []
@@ -70,18 +71,19 @@ class BootstrapDataSetGenerator():
 
             train_size = int(len(df)*7/8)
 
-            train_X, train_Y = self.get_X_Y(df[:train_size])
-            val_X, val_Y  = self.get_X_Y(df[train_size:])
+            train_X, train_Y = self.get_X_Y(df[:train_size], repeat=self.repeat)
+            val_X, val_Y  = self.get_X_Y(df[train_size:], repeat=self.repeat)
 
             train_x_list.append(train_X)
             train_y_list.append(train_Y)
 
             val_x_list.append(val_X)
             val_y_list.append(val_Y)
-            
-        train_dataset = MultiTensorDataSet(train_x_list, train_y_list)
-        val_dataset = MultiTensorDataSet(val_x_list, val_y_list)
 
+        
+        train_dataset = TensorDataset(torch.cat(train_x_list, dim=1), torch.cat(train_y_list, dim=1))
+        val_dataset = TensorDataset(torch.cat(val_x_list, dim=1), torch.cat(val_y_list, dim=1))
+            
         return (
             DataLoader(train_dataset, batch_size=self.batch_size),
             DataLoader(val_dataset, batch_size=self.batch_size),

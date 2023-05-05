@@ -12,20 +12,14 @@ def fit_multi_model(model, train_dl, val_dl, learning_rate=0.001, batch_size=32)
     
     model.train()
 
-    for epoch in range(1000):
-        loss_ep = torch.zeros(model.size)
+    for epoch in range(100):
+        loss_ep = 0
 
         print(f"Epoch {epoch} ... ")
         #        with tqdmtotal=len(train_dl)) as t:
         for batch_idx, (data, targets) in enumerate(train_dl):
-            data = [
-                d.to(device=device)
-                for d in data
-            ]
-            targets = torch.cat([
-                t.repeat(1, model.body[0].repeat).to(device=device)
-                for t in targets
-            ])
+            data = data.to(device=device)
+            targets = targets.to(device=device)
             ## Forward Pass
             scores = model(data)
             loss = criterion(scores, targets)
@@ -40,14 +34,8 @@ def fit_multi_model(model, train_dl, val_dl, learning_rate=0.001, batch_size=32)
             sum_loss = 0
             print("Computing validation accuracy ...")
             for batch_idx, (data,targets) in enumerate(val_dl):
-                data = [
-                    d.to(device=device)
-                    for d in data
-                ]
-                targets = torch.cat([
-                    t.repeat(1, model.body[0].repeat).to(device=device)
-                    for t in targets
-                ])
+                data = data.to(device=device)
+                targets = targets.to(device=device)
                 ## Forward Pass
                 scores = model(data)
                 loss = criterion(scores, targets)
@@ -70,7 +58,8 @@ def fit_models(model, train_dl, val_dl, learning_rate=0.001, batch_size=32):
     
     model.train()
 
-    for epoch in range(1000):
+    for epoch in range(100
+    ):
         loss_ep = 0
 
         print(f"Epoch {epoch} ... ")

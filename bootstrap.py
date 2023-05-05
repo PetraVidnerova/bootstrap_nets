@@ -25,14 +25,15 @@ def create_model(input_size):
 @click.argument("data_file")
 def main(batch_size, learning_rate, data_file):
 
-    model_batch = 10
+    model_batch = 100
+    repeat = 10
     
-    dataset = BootstrapDataSetGenerator(data_file, batch_size=batch_size)
+    dataset = BootstrapDataSetGenerator(data_file, batch_size=batch_size, repeat=repeat)
     train_set, val_set, input_size = dataset.get_data(samples=model_batch)
 
     multi_model = MultiModel(
         MultiMLPNetwork,
-        {"input_size": input_size, "repeat": 10},
+        {"input_size": input_size, "repeat": repeat},
         size=model_batch
     )
 

@@ -39,6 +39,7 @@ class MultiModel(nn.Module):
         super().__init__()
 
         self.size = size
+        self.input_size = model_params["input_size"]
 
         self.body = nn.ModuleList([
             model_class(**model_params)
@@ -46,8 +47,8 @@ class MultiModel(nn.Module):
         ])
         
 
-    def forward(self, x_list):
-        return [
-            net(x_list[i])
+    def forward(self, multix):
+        return torch.cat([
+            net(multix[:, i*self.input_size:(i+1)*self.input_size])
             for i, net in enumerate(self.body)
-        ]
+        ], dim=1)

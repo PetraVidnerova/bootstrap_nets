@@ -41,7 +41,7 @@ class MultiTensorDataSet(Dataset):
     def __getitem__(self, index):
         return (
             [x[index] for x in self.x_list],
-            [y[index] for y in self.y_list]
+            torch.cat([y[index] for y in self.y_list])
         )
                 
 

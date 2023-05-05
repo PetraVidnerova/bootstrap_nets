@@ -22,42 +22,36 @@ def fit_multi_model(model, train_dl, val_dl, learning_rate=0.001, batch_size=32)
                 d.to(device=device)
                 for d in data
             ]
-            targets = [
+            targets = torch.cat([
                 t.repeat(1, model.body[0].repeat).to(device=device)
                 for t in targets
-            ]
+            ])
             ## Forward Pass
             scores = model(data)
-            loss = [
-                criterion(sc, t)
-                for sc, t in zip(scores, targets)
-            ]
+            loss = criterion(scores, targets)
             optimizer.zero_grad()
-            _ = [ l.backward() for l in loss]
+            loss.backward()
             optimizer.step()
-            loss_ep += torch.Tensor([ l.item() for l in loss])        
+            loss_ep += loss.item()       
             
         print(f"Loss in epoch {epoch} :::: {loss_ep/len(train_dl)}")
 
         with torch.no_grad():
-            sum_loss = torch.zeros(model.size)
+            sum_loss = 0
             print("Computing validation accuracy ...")
             for batch_idx, (data,targets) in enumerate(val_dl):
                 data = [
                     d.to(device=device)
                     for d in data
                 ]
-                targets = [
+                targets = torch.cat([
                     t.repeat(1, model.body[0].repeat).to(device=device)
                     for t in targets
-                ]
+                ])
                 ## Forward Pass
                 scores = model(data)
-                loss = [
-                    criterion(sc, t)
-                    for sc, t in zip(scores, targets)
-                ]
-                sum_loss += torch.Tensor([ l.item() for l in loss])        
+                loss = criterion(scores, targets)
+                sum_loss += loss.item()
 
             print(
                 f"VAL loss: { sum_loss / len(val_dl)}"

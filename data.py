@@ -4,7 +4,7 @@ import pandas as pd
 import torch
 from torch.utils.data import DataLoader, TensorDataset, Dataset
 
-def load_data(data_file, batch_size=32):
+def load_data(data_file, batch_size=32, raw=False):
     df = pd.read_csv(data_file)
 
     df = df.sample(frac=1)
@@ -20,10 +20,14 @@ def load_data(data_file, batch_size=32):
     X_train, X_val, X_test = torch.Tensor(X_train), torch.Tensor(X_val), torch.Tensor(X_test)
     Y_train, Y_val, Y_test = torch.Tensor(Y_train), torch.Tensor(Y_val), torch.Tensor(Y_test)
     
-    
-    train_data = DataLoader(TensorDataset(X_train, Y_train), batch_size=batch_size)
-    val_data = DataLoader(TensorDataset(X_val, Y_val), batch_size=batch_size)
-    test_data = DataLoader(TensorDataset(X_test, Y_test), batch_size=batch_size)
+    if raw:
+        train_data = (X_train, Y_train)
+        val_data = (X_val, Y_val)
+        test_data = (X_test, Y_test)        
+    else:
+        train_data = DataLoader(TensorDataset(X_train, Y_train), batch_size=batch_size)
+        val_data = DataLoader(TensorDataset(X_val, Y_val), batch_size=batch_size)
+        test_data = DataLoader(TensorDataset(X_test, Y_test), batch_size=batch_size)
 
     return train_data, val_data, test_data, input_size
 

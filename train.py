@@ -20,7 +20,7 @@ def create_model(input_size):
     
 @click.command()
 @click.option("--batch_size", default=32)
-@click.option("--learning_rate", default=5e-3)
+@click.option("--learning_rate", default=1e-1)
 @click.argument("data_file")
 def main(batch_size, learning_rate, data_file):
 

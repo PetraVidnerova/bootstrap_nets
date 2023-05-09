@@ -124,7 +124,7 @@ def eval_models(model, test_dl):
     # print(sum_loss)
     return sum_loss.min(), sum_loss.argmin()
    
-def eval_model(model, test_dl):
+def eval_model(model, test_dl, half=False):
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     criterion = nn.MSELoss()
     
@@ -135,6 +135,9 @@ def eval_model(model, test_dl):
         for data, targets in test_dl:
             data = data.to(device=device)
             targets = targets.to(device=device)
+            if half:
+                data = data.half()
+                targets = data.half()
             # Forward Pass
             scores = model(data)
             residuals.append(targets-scores)
@@ -143,4 +146,6 @@ def eval_model(model, test_dl):
     # print(
     #     f"TEST accuracy: {float(sum_loss) / len(test_dl) :.2f}"
     # )
+
+    
     return torch.cat(residuals)

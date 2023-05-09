@@ -34,7 +34,11 @@ def do_the_work(batch_size, learning_rate, data_file,  i):
     winner = net.body[winner]
 
     residuals = eval_model(winner, test_data)
-    return residuals
+
+    residuals2 = eval_model(winner.half(), test_data, half=True)
+
+    
+    return residuals, residuals2
     
 #print(f"********** FINISHED {i} ************* ")
     # x = torch.Tensor(np.linspace(0, 1, 10000)).reshape(10000, 1)
@@ -50,23 +54,27 @@ def do_the_work(batch_size, learning_rate, data_file,  i):
     
 
 @click.command()
+@click.option("--steps", default=1000)
 @click.option("--batch_size", default=32)
 @click.option("--learning_rate", default=1e-1)
 @click.argument("data_file")
-def main(batch_size, learning_rate, data_file):
+def main(steps, batch_size, learning_rate, data_file):
 
     pool = mp.Pool(5)
-
+    
     residuals = []
-    for res in  tqdm(pool.imap_unordered(
+    residuals2 = [] 
+    for res, res2 in  tqdm(pool.imap_unordered(
             partial(do_the_work, batch_size, learning_rate, data_file),
-            range(1000)
-    ), total = 1000):
+            range(steps)
+    ), total = steps):
         residuals.append(res)
-
-    result = torch.cat(residuals, dim=1)
-    torch.save(result, "residuals.pt")
+        residuals2.append(res2)
         
+    result, result2 = torch.cat(residuals, dim=1), torch.cat(residuals2, dim=1)
+    torch.save(result, "residuals.pt")
+    torch.save(result2, "residuals2.pt")
+    
 if __name__ == "__main__":
     main()
 
